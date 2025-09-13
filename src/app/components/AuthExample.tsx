@@ -32,7 +32,7 @@ export default function AuthExample() {
       } else {
         setUser(user)
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load user')
     } finally {
       setLoading(false)

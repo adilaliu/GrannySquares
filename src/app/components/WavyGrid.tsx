@@ -89,7 +89,7 @@ export default function WavyGrid({
         cancelAnimationFrame(animationId);
       }
     };
-  }, [isOverlayMode]);
+  }, [isOverlayMode, selectedSquare]);
 
   useEffect(() => {
     let animationFrame: number;

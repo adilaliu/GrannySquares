@@ -1,4 +1,4 @@
-import AuthExample from "./components/AuthExample";
+// import AuthExample from "./components/AuthExample";
 import WavyGrid from "./components/WavyGrid";
 
 export default function Home() {
