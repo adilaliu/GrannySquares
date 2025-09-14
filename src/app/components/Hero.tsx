@@ -128,21 +128,21 @@ export default function Hero() {
   }, []);
 
   // Simple, bounded animations
-  const cafeBorderTop = -scrollProgress * 180; // Exactly its height
+  const cafeBorderTop = -scrollProgress * 200; // Exactly its height
   const textScale = 1 - scrollProgress * 0.4; // Scale from 1 to 0.6
 
   // Calculate text position to tuck at top
   // When fully scrolled, text should be at top with some padding
   const viewportHeight =
     typeof window !== "undefined" ? window.innerHeight : 800;
-  const textTuckPosition = scrollProgress * (-viewportHeight * 0.45) + 80; // Tuck to top 45% of screen
+  const textTuckPosition = scrollProgress * (-viewportHeight * 0.3) + 80; // Tuck to top 45% of screen
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <GridBackgroundPattern />
+
       {/* Grid Background Pattern */}
       <div className="absolute inset-0 w-full h-full">
-        <GridBackgroundPattern />
-
         <CafeBorder top={cafeBorderTop} />
       </div>
 
@@ -150,7 +150,9 @@ export default function Hero() {
       <div
         className="relative z-10 container mx-auto px-4 text-center"
         style={{
-          transform: `translateY(${textTuckPosition}px) scale(${textScale})`,
+          transform: `translateY(${textTuckPosition}px) scale(${
+            (textScale - 1) / 5 + 1
+          })`,
           transformOrigin: "center top",
         }}
       >
@@ -168,10 +170,22 @@ export default function Hero() {
             opacity: Math.min(scrollProgress * 2, 1), // Fade in based on scroll progress
           }}
         >
-          <SearchBar
-            placeholder="Search by dish, flavour, or country..."
-            onSearch={(query) => console.log("Searching for:", query)}
-          />
+          <SearchBar placeholder="Search by dish, flavour, or country..." />
+        </div>
+
+        {/* Navigation Links */}
+        <div
+          className="mt-6 transition-opacity duration-300 ease-in flex flex-col sm:flex-row gap-4 justify-center"
+          style={{
+            opacity: Math.min(scrollProgress * 2, 1), // Fade in based on scroll progress
+          }}
+        >
+          <a
+            href="/create"
+            className="inline-flex items-center px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold font-advent-pro rounded-full transition-all duration-200 transform hover:scale-105 shadow-lg"
+          >
+            SHARE YOUR OWN RECIPE
+          </a>
         </div>
       </div>
 

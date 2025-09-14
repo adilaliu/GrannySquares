@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -18,6 +19,7 @@ export default function SearchBar({
   onChange,
 }: SearchBarProps) {
   const [internalValue, setInternalValue] = useState("");
+  const router = useRouter();
 
   // Use controlled value if provided, otherwise use internal state
   const value = controlledValue !== undefined ? controlledValue : internalValue;
@@ -29,8 +31,18 @@ export default function SearchBar({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSearch) {
-      onSearch(value);
+    const searchValue = value.trim();
+
+    if (searchValue) {
+      // If there's a custom onSearch handler, use it
+      if (onSearch) {
+        onSearch(searchValue);
+      } else {
+        // Otherwise, navigate to search page
+        const params = new URLSearchParams();
+        params.set("q", searchValue);
+        router.push(`/search?${params.toString()}`);
+      }
     }
   };
 

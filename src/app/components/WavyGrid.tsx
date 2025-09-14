@@ -93,7 +93,7 @@ export default function WavyGrid({
           const squareId = square.getAttribute("data-square-id")!;
 
           // Calculate base position for this column
-          let baseX = col * totalWidth;
+          const baseX = col * totalWidth;
 
           // Apply scroll offset
           let currentX = baseX - scrollPositionRef.current;
@@ -122,7 +122,7 @@ export default function WavyGrid({
           const waveY = baseWaveY;
 
           // Smooth scale animation
-          let targetScale = hoveredSquare === squareId ? 1.3 : 1.0; // Increased hover scale from 1.1 to 1.3
+          const targetScale = hoveredSquare === squareId ? 1.3 : 1.0; // Increased hover scale from 1.1 to 1.3
 
           const currentScale = scaleValues.current.get(squareId) || 1.0;
           const newScale = currentScale + (targetScale - currentScale) * 0.15;
