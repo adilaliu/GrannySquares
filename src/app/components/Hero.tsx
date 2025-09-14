@@ -9,7 +9,7 @@ import WavyGrid, { Recipe } from "./WavyGrid";
 const sampleRecipes: Recipe[] = [
   {
     id: "1",
-    title: "Classic Granny Square",
+    title: "Top Secret Tomyum",
     thumbnail:
       "https://images.unsplash.com/photo-1601979031925-424e53b6caaa?w=400&h=400&fit=crop&crop=center",
     url: "/recipes/classic-granny-square",
@@ -18,7 +18,7 @@ const sampleRecipes: Recipe[] = [
   },
   {
     id: "2",
-    title: "Flower Power Square",
+    title: "Burger Delight",
     thumbnail:
       "https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=400&h=400&fit=crop&crop=center",
     url: "/recipes/flower-power-square",
@@ -27,7 +27,7 @@ const sampleRecipes: Recipe[] = [
   },
   {
     id: "3",
-    title: "Rainbow Ripple Square",
+    title: "Mama's Macarons",
     thumbnail:
       "https://images.unsplash.com/photo-1576082958492-da2dcbdb2e1a?w=400&h=400&fit=crop&crop=center",
     url: "/recipes/rainbow-ripple-square",
@@ -35,7 +35,7 @@ const sampleRecipes: Recipe[] = [
   },
   {
     id: "4",
-    title: "Celtic Knot Square",
+    title: "Longevity Smoothie Bowl",
     thumbnail:
       "https://images.unsplash.com/photo-1613575831056-0ac4c3750b3e?w=400&h=400&fit=crop&crop=center",
     url: "/recipes/celtic-knot-square",
@@ -43,7 +43,7 @@ const sampleRecipes: Recipe[] = [
   },
   {
     id: "5",
-    title: "Sunburst Square",
+    title: "Nonna's Best",
     thumbnail:
       "https://images.unsplash.com/photo-1627662055398-3995ca505b20?w=400&h=400&fit=crop&crop=center",
     url: "/recipes/sunburst-square",
@@ -52,40 +52,14 @@ const sampleRecipes: Recipe[] = [
   },
   {
     id: "6",
-    title: "Mandala Square",
+    title: "Avo Eggs Benedict",
     thumbnail:
       "https://images.unsplash.com/photo-1619696506371-d3354489034c?w=400&h=400&fit=crop&crop=center",
     url: "/recipes/mandala-square",
     description:
       "Meditative mandala patterns that create stunning symmetrical designs.",
   },
-  {
-    id: "7",
-    title: "Solid Color Square",
-    thumbnail:
-      "https://images.unsplash.com/photo-1608932631011-6fa4f5b0c0b3?w=400&h=400&fit=crop&crop=center",
-    url: "/recipes/solid-color-square",
-    description:
-      "Simple solid color squares perfect for combining into larger projects.",
-  },
-  {
-    id: "8",
-    title: "Textured Bobble Square",
-    thumbnail:
-      "https://images.unsplash.com/photo-1611312449467-1b75df05e55b?w=400&h=400&fit=crop&crop=center",
-    url: "/recipes/textured-bobble-square",
-    description:
-      "Add dimension with raised bobble stitches in this textured pattern.",
-  },
-  {
-    id: "9",
-    title: "Textured Bobble Square",
-    thumbnail:
-      "https://images.unsplash.com/photo-1611312449467-1b75df05e55b?w=400&h=400&fit=crop&crop=center",
-    url: "/recipes/textured-bobble-square",
-    description:
-      "Add dimension with raised bobble stitches in this textured pattern.",
-  },
+
 ];
 
 export default function Hero() {
