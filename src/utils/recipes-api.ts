@@ -115,6 +115,15 @@ export async function analyzeRecipe(text: string): Promise<{
 }
 
 /**
+ * Generate an image for the analyzed recipe
+ */
+export async function generateRecipeImage(
+  analyzedRecipe: FullRecipeDraft,
+): Promise<ApiResponse & { imageUrl?: string }> {
+  return apiPost("/api/recipes/generate-image", { analyzedRecipe });
+}
+
+/**
  * Utility to format recipe data for API calls
  */
 export function formatRecipeForAPI(recipe: {

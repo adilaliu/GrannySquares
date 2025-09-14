@@ -1,10 +1,15 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import GridBackgroundPattern from "../components/GridBackgroundPattern";
 import RecipeCard from "../components/RecipeCard";
-import { analyzeRecipe, createRecipe } from "@/utils/recipes-api";
+import {
+  analyzeRecipe,
+  createRecipe,
+  generateRecipeImage,
+} from "@/utils/recipes-api";
 import { getCurrentUser } from "@/utils/auth-api";
 import { getCurrentProfile, createProfile } from "@/utils/profiles-api";
 import { FullRecipeDraft } from "@/db/client";
@@ -42,6 +47,12 @@ const CreateRecipePage: React.FC = () => {
   );
   const [showPreview, setShowPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Image generation states
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(
+    null
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -270,6 +281,8 @@ const CreateRecipePage: React.FC = () => {
                 setAnalysisContent(data.accumulated);
               } else if (data.type === "complete") {
                 setAnalyzedRecipe(data.recipe);
+                // Start image generation automatically after analysis completes
+                handleGenerateImage(data.recipe);
                 // Keep showing preview, let RecipeCard handle completion animation
                 break;
               } else if (data.type === "error") {
@@ -289,6 +302,40 @@ const CreateRecipePage: React.FC = () => {
       setShowPreview(false); // Hide preview on error
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleGenerateImage = async (recipe: FullRecipeDraft) => {
+    if (!recipe) return;
+
+    setIsGeneratingImage(true);
+    setError(null);
+
+    try {
+      const result = await generateRecipeImage(recipe);
+
+      if (result.success && result.data?.imageUrl) {
+        setGeneratedImageUrl(result.data.imageUrl);
+        // Update the analyzed recipe to include the generated image
+        setAnalyzedRecipe((prevRecipe) => {
+          if (!prevRecipe) return prevRecipe;
+          return {
+            ...prevRecipe,
+            recipe: {
+              ...prevRecipe.recipe,
+              hero_image_url: result.data.imageUrl,
+            },
+          };
+        });
+      } else {
+        console.warn("Image generation failed:", result.error);
+        // Don't show error to user, continue without image
+      }
+    } catch (err) {
+      console.error("Image generation failed:", err);
+      // Don't show error to user, continue without image
+    } finally {
+      setIsGeneratingImage(false);
     }
   };
 
@@ -339,6 +386,8 @@ const CreateRecipePage: React.FC = () => {
     setAnalysisContent("");
     setError(null);
     setTranscription(""); // Reset transcription box
+    setIsGeneratingImage(false);
+    setGeneratedImageUrl(null);
   };
 
   // Show loading screen while checking authentication
@@ -544,20 +593,117 @@ const CreateRecipePage: React.FC = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Image Generation Progress */}
+                {isGeneratingImage && (
+                  <div className="mt-4 p-4 bg-orange-50 rounded-lg">
+                    <h3 className="text-sm font-semibold text-orange-700 mb-2">
+                      Generating Recipe Image:
+                    </h3>
+                    <div className="flex items-center gap-3 text-sm text-orange-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange"></div>
+                      <span>
+                        Creating a beautiful pixel-art granny square image of
+                        your dish...
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Image Generation Complete */}
+                {generatedImageUrl && !isGeneratingImage && (
+                  <div className="mt-4 p-4 bg-green-50 rounded-lg">
+                    <h3 className="text-sm font-semibold text-green-700 mb-2">
+                      Recipe Image Generated! ✨
+                    </h3>
+                    <div className="text-sm text-green-600">
+                      Your cozy granny square image has been added to the
+                      recipe.
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
-              /* Recipe Card */
-              <div className="w-full h-full flex items-center justify-center">
-                <RecipeCard
-                  recipe={analyzedRecipe}
-                  partialContent={analysisContent}
-                  isStreaming={isAnalyzing}
-                  isComplete={!isAnalyzing && !!analyzedRecipe}
-                  showActions={true}
-                  onSave={handleSaveRecipe}
-                  isSaving={isSaving}
-                  className="flex-1"
-                />
+              /* Recipe Card and Image Preview */
+              <div className="w-full h-full flex items-center justify-center gap-8">
+                {/* Recipe Card */}
+                <div className="flex-shrink-0">
+                  <RecipeCard
+                    recipe={analyzedRecipe}
+                    partialContent={analysisContent}
+                    isStreaming={isAnalyzing || isGeneratingImage}
+                    isComplete={
+                      !isAnalyzing && !isGeneratingImage && !!analyzedRecipe
+                    }
+                    showActions={true}
+                    onSave={handleSaveRecipe}
+                    isSaving={isSaving}
+                  />
+                </div>
+
+                {/* Image Display Area */}
+                <div className="flex-shrink-0 w-80 h-80">
+                  <div className="w-full h-full bg-[#FFFAF3] rounded-2xl shadow-2xl border-4 border-orange/20 flex items-center justify-center overflow-hidden">
+                    {isGeneratingImage ? (
+                      /* Loading State */
+                      <div className="text-center p-6">
+                        <div className="relative mb-4">
+                          {/* Animated granny square pattern */}
+                          <div className="w-24 h-24 mx-auto relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-orange to-pink rounded-lg animate-pulse"></div>
+                            <div
+                              className="absolute inset-2 bg-gradient-to-br from-green to-blue rounded-lg animate-pulse"
+                              style={{ animationDelay: "0.5s" }}
+                            ></div>
+                            <div
+                              className="absolute inset-4 bg-gradient-to-br from-purple to-yellow rounded-lg animate-pulse"
+                              style={{ animationDelay: "1s" }}
+                            ></div>
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-bold text-brown font-advent-pro mb-2">
+                          Crafting Your Granny Square...
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Creating a cozy pixel-art image of your delicious dish
+                        </p>
+                      </div>
+                    ) : generatedImageUrl ? (
+                      /* Generated Image */
+                      <div className="w-full h-full relative">
+                        <img
+                          src={generatedImageUrl}
+                          alt="Generated recipe image"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error("Failed to load generated image");
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      /* Placeholder */
+                      <div className="text-center p-6">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-orange/10 rounded-lg flex items-center justify-center">
+                          <svg
+                            className="w-8 h-8 text-orange"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          Recipe image will appear here
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -607,11 +753,13 @@ const CreateRecipePage: React.FC = () => {
               onClick={handleNext}
               disabled={
                 isAnalyzing ||
+                isGeneratingImage ||
                 isSaving ||
                 (!transcription.trim() && !showPreview)
               }
               className={`px-4 py-3 rounded-lg transition-colors flex items-center gap-2 text-black font-advent-pro font-bold ${
                 isAnalyzing ||
+                isGeneratingImage ||
                 isSaving ||
                 (!transcription.trim() && !showPreview)
                   ? "bg-gray-300 cursor-not-allowed"
@@ -623,11 +771,13 @@ const CreateRecipePage: React.FC = () => {
                   ? "SAVING..."
                   : showPreview
                   ? "SAVE RECIPE"
+                  : isGeneratingImage
+                  ? "GENERATING IMAGE..."
                   : isAnalyzing
                   ? "ANALYZING..."
                   : "ANALYZE"}
               </span>
-              {!isAnalyzing && !isSaving && (
+              {!isAnalyzing && !isGeneratingImage && !isSaving && (
                 <svg
                   className="w-5 h-5"
                   fill="currentColor"
