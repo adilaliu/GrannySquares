@@ -159,13 +159,13 @@ export default function Hero() {
         <h1 className="text-6xl mb-2 text-brown font-advent-pro font-extrabold transition-all duration-200 ease-in">
           WELCOME TO GRANNY SQUARES!
         </h1>
-        <p className="text-3xl text-orange max-w-4xl mx-auto leading-relaxed font-advent-pro font-semibold transition-all duration-200 ease-in">
-          FIND RECIPES THAT FEEL LIKE HOME
+        <p className="text-3xl text-orange max-w-4xl mx-auto leading-relaxed font-inter font-medium transition-all duration-200 ease-in">
+          Find recipes that feel like home
         </p>
 
         {/* SearchBar - fades in as user scrolls */}
         <div
-          className="mt-8 max-w-lg mx-auto transition-opacity duration-300 ease-in"
+          className="mt-8 mx-auto transition-opacity duration-300 ease-in"
           style={{
             opacity: Math.min(scrollProgress * 2, 1), // Fade in based on scroll progress
           }}
@@ -182,7 +182,23 @@ export default function Hero() {
         >
           <a
             href="/create"
-            className="inline-flex items-center px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold font-advent-pro rounded-full transition-all duration-200 transform hover:scale-105 shadow-lg"
+            className="inline-flex items-center px-6 py-3 rounded-full transition-all duration-200 transform shadow-lg font-advent-pro"
+            style={{
+              fontFamily: "Advent Pro, sans-serif",
+              fontSize: "24px",
+              fontWeight: 600,
+              backgroundColor: "#C56219",
+              color: "#fff",
+              transition: "background 0.2s, color 0.3s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#842E00";
+              e.currentTarget.style.color = "#fff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#C56219";
+              e.currentTarget.style.color = "#fff";
+            }}
           >
             SHARE YOUR OWN RECIPE
           </a>

@@ -156,10 +156,10 @@ function SignInContent() {
       {/* Header */}
       <div className="relative z-10 pt-32 pb-8 flex-shrink-0">
         <div className="container mx-auto px-4">
-          <h1 className="text-5xl font-bold text-gray-800 text-center font-advent-pro mb-4">
-            WELCOME BACK
+          <h1 className="text-5xl font-extrabold text-gray-800 text-center font-advent-pro mb-4">
+            NICE TO SEE YOU!
           </h1>
-          <p className="text-gray-600 text-center text-lg font-advent-pro">
+          <p className="text-center text-xl font-inter font-medium" style={{ color: '#C56219' }}>
             Sign in to share your delicious recipes
           </p>
         </div>

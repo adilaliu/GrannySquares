@@ -61,13 +61,17 @@ export default function SearchBar({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         style={{
+          width: "54vw",
+          height: "50px",
           outline: "none",
           fontStyle: "normal",
           fontWeight: 400,
           fontSize: "24px",
           color: "#29160F",
+          boxShadow: "0 2px 4px 0 rgba(0, 0, 0, 0.25) inset",
+          filter: "drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25))",
         }}
-        className="w-full h-full placeholder:text-[#29160F] placeholder:opacity-50 border-gray-400 border-2 rounded-2xl bg-white p-4 font-inter"
+        className="placeholder:text-[#29160F] placeholder:opacity-50 border-gray-400 border-2 rounded-4xl bg-white p-4 font-inter"
       />
     </form>
   );
