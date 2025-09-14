@@ -128,7 +128,7 @@ export default function Hero() {
   }, []);
 
   // Simple, bounded animations
-  const cafeBorderTop = -scrollProgress * 200; // Exactly its height
+  const cafeBorderTop = -scrollProgress * 500; // Exactly its height
   const textScale = 1 - scrollProgress * 0.4; // Scale from 1 to 0.6
 
   // Calculate text position to tuck at top
