@@ -150,9 +150,6 @@ function SignInContent() {
       {/* Grid Background */}
       <GridBackgroundPattern />
 
-      {/* Cafe Border */}
-      <CafeBorder top={0} />
-
       {/* Header */}
       <div className="relative z-10 pt-32 pb-8 flex-shrink-0">
         <div className="container mx-auto px-4">
