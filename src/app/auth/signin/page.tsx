@@ -190,8 +190,9 @@ function SignInContent() {
         <GridBackgroundPattern />
         <div className="relative z-10 flex items-center gap-3 text-gray-600">
           <div className="w-8 h-8 border-4 border-orange border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-lg font-medium font-advent-pro">
-            Loading...
+          <span className="text-xl font-semibold font-advent-pro" style={{ color: "#C56219" }}>
+            LOADING...
+            
           </span>
         </div>
       </div>
@@ -223,7 +224,10 @@ function SignInContent() {
       {/* Header */}
       <div className="relative z-10 pt-32 pb-8 flex-shrink-0">
         <div className="container mx-auto px-4">
-          <h1 className="text-5xl font-extrabold text-gray-800 text-center font-advent-pro mb-4">
+          <h1
+            className="text-5xl font-extrabold text-center font-advent-pro mb-4"
+            style={{ color: "#29160F" }}
+          >
             NICE TO SEE YOU!
           </h1>
           <p
@@ -241,13 +245,13 @@ function SignInContent() {
           <div className="bg-background-secondary rounded-2xl shadow-2xl border border-brown/50 border-3 overflow-hidden">
             {/* Status Messages */}
             {message && (
-              <div className="m-6 mb-0 p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl text-sm font-medium">
+              <div className="m-6 mb-0 p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl text-sm font-inter">
                 {message}
               </div>
             )}
 
             {error && (
-              <div className="m-6 mb-0 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm font-medium">
+              <div className="m-6 mb-0 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm font-inter">
                 {error}
               </div>
             )}
@@ -257,7 +261,7 @@ function SignInContent() {
               <button
                 onClick={handleGoogleSignIn}
                 disabled={isSubmitting}
-                className="w-full bg-white hover:bg-gray-50 disabled:bg-gray-100 text-gray-900 font-semibold py-4 px-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 flex items-center justify-center gap-3 mb-6"
+                className="w-full bg-white hover:bg-gray-50 disabled:bg-gray-100 text-gray-900 font-inter font-semibold py-4 px-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 flex items-center justify-center gap-3 mb-6"
               >
                 {isSubmitting ? (
                   <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
@@ -290,7 +294,7 @@ function SignInContent() {
                   <div className="w-full border-t border-gray-200"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-clear text-gray-500 font-medium">
+                  <span className="px-4 bg-clear text-gray-500 font-inter">
                     or continue with
                   </span>
                 </div>
@@ -300,7 +304,7 @@ function SignInContent() {
               <div className="flex rounded-lg bg-background p-1 mb-6">
                 <button
                   onClick={() => setActiveTab("email")}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-inter transition-all duration-200 ${
                     activeTab === "email"
                       ? "bg-white text-gray-900 shadow-sm"
                       : "text-gray-600 hover:text-gray-900"
@@ -310,7 +314,7 @@ function SignInContent() {
                 </button>
                 <button
                   onClick={() => setActiveTab("phone")}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-inter transition-all duration-200 ${
                     activeTab === "phone"
                       ? "bg-white text-gray-900 shadow-sm"
                       : "text-gray-600 hover:text-gray-900"
@@ -326,7 +330,7 @@ function SignInContent() {
                   <div>
                     <label
                       htmlFor="email"
-                      className="block text-sm font-semibold text-gray-900 mb-2"
+                      className="block text-sm font-inter font-semibold text-gray-900 mb-2"
                     >
                       Email address
                     </label>
@@ -345,7 +349,7 @@ function SignInContent() {
                   <button
                     type="submit"
                     disabled={isSubmitting || !email.trim()}
-                    className="w-full bg-orange hover:bg-orange/80 disabled:bg-orange/30 text-white font-semibold py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
+                    className="w-full bg-orange hover:bg-orange/80 disabled:bg-orange/30 text-white font-inter font-semibold py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <>
@@ -380,7 +384,7 @@ function SignInContent() {
                   <div>
                     <label
                       htmlFor="phone"
-                      className="block text-sm font-semibold text-gray-900 mb-2"
+                      className="block text-sm font-inter font-semibold text-gray-900 mb-2"
                     >
                       Phone number
                     </label>
@@ -402,7 +406,7 @@ function SignInContent() {
                   <button
                     type="submit"
                     disabled={isSubmitting || !phone.trim()}
-                    className="w-full bg-orange hover:bg-orange/80 disabled:bg-orange/30 text-white font-semibold py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
+                    className="w-full bg-orange hover:bg-orange/80 disabled:bg-orange/30 text-white font-inter font-semibold py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <>

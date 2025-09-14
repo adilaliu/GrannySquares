@@ -397,8 +397,8 @@ const CreateRecipePage: React.FC = () => {
         <GridBackgroundPattern />
         <div className="relative z-10 flex items-center gap-3 text-gray-600">
           <div className="w-8 h-8 border-4 border-orange border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-lg font-medium font-advent-pro">
-            Checking authentication...
+          <span className="text-xl font-semibold font-advent-pro" style={{ color: "#C56219" }}>
+            CHECKING AUTHENTIFICATION...
           </span>
         </div>
       </div>
