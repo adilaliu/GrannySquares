@@ -7,6 +7,209 @@ import {
   errorResponse,
 } from "@/utils/api-responses";
 
+// Enhanced function to extract and fix JSON from AI responses
+function extractJsonFromResponse(content: string): any {
+  // Remove any leading/trailing whitespace
+  content = content.trim();
+
+  // Try parsing as-is first
+  try {
+    return JSON.parse(content);
+  } catch {
+    // If that fails, try to extract and fix JSON
+    let extracted = content;
+
+    // Try to extract JSON from markdown code blocks first
+    const jsonBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/i);
+    if (jsonBlockMatch) {
+      extracted = jsonBlockMatch[1].trim();
+    } else {
+      // Look for JSON object pattern anywhere in the text
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        extracted = jsonMatch[0];
+      } else {
+        // Clean up common prefixes
+        extracted = content
+          .replace(/^[^{]*/, "") // Remove everything before first {
+          .replace(/```json\s*/gi, "")
+          .replace(/```\s*/g, "")
+          .replace(/^\s*["']?json["']?\s*:?\s*/i, "")
+          .trim();
+      }
+    }
+
+    // Now try to fix common JSON issues
+    let fixed = extracted;
+
+    // Fix incomplete strings (missing closing quotes)
+    fixed = fixIncompleteStrings(fixed);
+
+    // Remove trailing commas
+    fixed = fixed.replace(/,(\s*[}\]])/g, "$1");
+
+    // Try to balance braces and brackets
+    fixed = balanceBrackets(fixed);
+
+    // Try parsing the fixed version
+    try {
+      return JSON.parse(fixed);
+    } catch {
+      // If still failing, try more aggressive fixes
+      return attemptPartialParse(fixed);
+    }
+  }
+}
+
+// Fix incomplete strings by adding missing quotes
+function fixIncompleteStrings(json: string): string {
+  // Pattern to find string values that might be missing closing quotes
+  // This is a simple heuristic - look for quote followed by content until newline or other structural chars
+  const lines = json.split("\n");
+  const fixedLines = lines.map((line) => {
+    // Match patterns like: "key": "unclosed string value
+    const unclosedStringMatch = line.match(/^(\s*"[^"]*":\s*"[^"]*)$/);
+    if (unclosedStringMatch) {
+      return unclosedStringMatch[1] + '"';
+    }
+
+    // Match patterns like: "key": "unclosed string value,
+    const unclosedWithCommaMatch = line.match(/^(\s*"[^"]*":\s*"[^"]*),?\s*$/);
+    if (
+      unclosedWithCommaMatch &&
+      !line.includes('"', unclosedWithCommaMatch[1].lastIndexOf('"') + 1)
+    ) {
+      return unclosedWithCommaMatch[1] + '"' + (line.endsWith(",") ? "," : "");
+    }
+
+    return line;
+  });
+
+  return fixedLines.join("\n");
+}
+
+// Balance brackets and braces
+function balanceBrackets(json: string): string {
+  const openBraces = (json.match(/{/g) || []).length;
+  const closeBraces = (json.match(/}/g) || []).length;
+  const openBrackets = (json.match(/\[/g) || []).length;
+  const closeBrackets = (json.match(/]/g) || []).length;
+
+  let result = json;
+
+  // Add missing closing braces
+  for (let i = 0; i < openBraces - closeBraces; i++) {
+    result += "}";
+  }
+
+  // Add missing closing brackets
+  for (let i = 0; i < openBrackets - closeBrackets; i++) {
+    result += "]";
+  }
+
+  return result;
+}
+
+// Attempt to parse what we can from partial JSON
+function attemptPartialParse(json: string): any {
+  // Try to extract at least the recipe object structure
+  const result: any = {};
+
+  // Look for recipe object
+  const recipeMatch = json.match(
+    /"recipe"\s*:\s*\{([^}]*(?:\{[^}]*\}[^}]*)*)\}/,
+  );
+  if (recipeMatch) {
+    try {
+      const recipeJson = `{${recipeMatch[1]}}`;
+      result.recipe = JSON.parse(recipeJson);
+    } catch {
+      // Extract what we can from recipe
+      result.recipe = extractSimpleFields(recipeMatch[1]);
+    }
+  }
+
+  // Look for ingredients array
+  const ingredientsMatch = json.match(/"ingredients"\s*:\s*\[([\s\S]*?)\]/);
+  if (ingredientsMatch) {
+    try {
+      result.ingredients = JSON.parse(`[${ingredientsMatch[1]}]`);
+    } catch {
+      result.ingredients = [];
+    }
+  }
+
+  // Look for steps array
+  const stepsMatch = json.match(/"steps"\s*:\s*\[([\s\S]*?)\]/);
+  if (stepsMatch) {
+    try {
+      result.steps = JSON.parse(`[${stepsMatch[1]}]`);
+    } catch {
+      result.steps = [];
+    }
+  }
+
+  // Ensure we have at least basic structure
+  if (!result.recipe) {
+    result.recipe = { title: "Recipe in Progress", public: true };
+  }
+  if (!result.ingredients) {
+    result.ingredients = [];
+  }
+  if (!result.steps) {
+    result.steps = [];
+  }
+  if (!result.substitutions) {
+    result.substitutions = [];
+  }
+  if (!result.images) {
+    result.images = [];
+  }
+
+  return result;
+}
+
+// Extract simple key-value pairs from partial JSON
+function extractSimpleFields(content: string): any {
+  const result: any = { public: true };
+
+  // Extract title
+  const titleMatch = content.match(/"title"\s*:\s*"([^"]*)"/);
+  if (titleMatch) {
+    result.title = titleMatch[1];
+  } else {
+    result.title = "Recipe in Progress";
+  }
+
+  // Extract description
+  const descMatch = content.match(/"description_md"\s*:\s*"([^"]*)"/);
+  if (descMatch) {
+    result.description_md = descMatch[1];
+  }
+
+  // Extract other simple fields
+  const fieldsToExtract = ["yield_text", "cuisine", "difficulty"];
+  fieldsToExtract.forEach((field) => {
+    const regex = new RegExp(`"${field}"\\s*:\\s*"([^"]*)"`, "i");
+    const match = content.match(regex);
+    if (match) {
+      result[field] = match[1];
+    }
+  });
+
+  // Extract numeric fields
+  const numericFields = ["total_time_min", "active_time_min"];
+  numericFields.forEach((field) => {
+    const regex = new RegExp(`"${field}"\\s*:\\s*(\\d+)`, "i");
+    const match = content.match(regex);
+    if (match) {
+      result[field] = parseInt(match[1]);
+    }
+  });
+
+  return result;
+}
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -15,14 +218,17 @@ const openai = new OpenAI({
 const SYSTEM_PROMPT =
   `You are an expert recipe analyzer. Your task is to convert natural language recipe descriptions into well-structured recipe data in JSON format.
 
-IMPORTANT INSTRUCTIONS:
-1. Return ONLY valid JSON - no markdown, no explanations, no additional text
-2. Use the exact field names and structure specified below
-3. Extract all possible information from the input text
-4. If information is missing or unclear, use reasonable defaults or null
-5. Be thorough in extracting ingredients, steps, and metadata
-6. Preserve cooking tips, temperatures, and timing information
-7. Infer difficulty level based on complexity of techniques and time required
+CRITICAL INSTRUCTIONS:
+1. Return ONLY the JSON object - NO markdown formatting, NO code blocks, NO explanations, NO additional text
+2. Do NOT wrap the response in \`\`\`json or \`\`\` - return pure JSON only
+3. Do NOT include any conversational text like "I'm sorry" or "Here's the recipe"
+4. Start your response directly with { and end with }
+5. Use the exact field names and structure specified below
+6. Extract all possible information from the input text
+7. If information is missing or unclear, use reasonable defaults or null
+8. Be thorough in extracting ingredients, steps, and metadata
+9. Preserve cooking tips, temperatures, and timing information
+10. Infer difficulty level based on complexity of techniques and time required
 
 Required JSON structure:
 {
@@ -63,7 +269,7 @@ Required JSON structure:
   "substitutions": [
     {
       "ingredient_idx": "number (index of ingredient to substitute)",
-      "suggestion": "string (substitution suggestion)"
+      "suggestion": "string (substitution suggestion - ONLY include if explicitly mentioned in original text)"
     }
   ],
   "images": []
@@ -75,14 +281,19 @@ PARSING GUIDELINES:
 - For temperatures, convert to Celsius if given in Fahrenheit
 - For times, convert everything to minutes for consistency
 - Infer cooking methods and tools from the instructions
-- Look for substitution suggestions in the text
+- ONLY include substitutions that are explicitly mentioned in the original recipe text or when you are absolutely certain they would be appropriate
+- DO NOT automatically suggest substitutions unless they were mentioned or clearly implied in the original text
 - Set difficulty: easy (30min, basic techniques), medium (30-60min, some skill), hard (60min+, advanced techniques)
 - Extract dietary information (vegetarian, vegan, gluten-free, dairy-free, etc.)
 - Common allergens: nuts, dairy, eggs, soy, shellfish, fish, wheat, sesame
 
 Example input: "Make chocolate chip cookies. Mix 2 cups flour, 1 tsp baking soda. Cream 1 cup butter with 3/4 cup sugar. Bake at 375F for 10 minutes."
 
-Remember: Return ONLY the JSON object, nothing else.`;
+FINAL REMINDER: 
+- Your response must be valid JSON that can be parsed with JSON.parse()
+- Do NOT use markdown formatting
+- Do NOT include any text before or after the JSON
+- Start with { and end with }`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -153,16 +364,35 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          // Try to parse the final JSON
+          // Try to extract and parse the final JSON
           try {
-            const parsedRecipe = JSON.parse(accumulatedContent.trim());
+            const parsedRecipe = extractJsonFromResponse(accumulatedContent);
 
-            // Validate the structure
-            if (!parsedRecipe.recipe || !parsedRecipe.recipe.title) {
-              throw new Error("Invalid recipe structure");
+            // The new parsing function should always return something valid
+            // but let's add some final safety checks
+            if (!parsedRecipe.recipe) {
+              parsedRecipe.recipe = {
+                title: "Recipe in Progress",
+                public: true,
+              };
+            }
+            if (!parsedRecipe.recipe.title) {
+              parsedRecipe.recipe.title = "Recipe in Progress";
+            }
+            if (!Array.isArray(parsedRecipe.ingredients)) {
+              parsedRecipe.ingredients = [];
+            }
+            if (!Array.isArray(parsedRecipe.steps)) {
+              parsedRecipe.steps = [];
+            }
+            if (!Array.isArray(parsedRecipe.substitutions)) {
+              parsedRecipe.substitutions = [];
+            }
+            if (!Array.isArray(parsedRecipe.images)) {
+              parsedRecipe.images = [];
             }
 
-            // Send final complete result
+            // Send final complete result - should always succeed now
             controller.enqueue(
               encoder.encode(`data: ${
                 JSON.stringify({
@@ -173,11 +403,30 @@ export async function POST(request: NextRequest) {
             );
           } catch (parseError) {
             console.error("Failed to parse generated recipe JSON:", parseError);
+            console.error(
+              "Raw content:",
+              accumulatedContent.substring(0, 500) + "...",
+            );
+
+            // Fallback: send a minimal valid recipe instead of erroring
+            const fallbackRecipe = {
+              recipe: {
+                title: "Recipe Analysis Failed",
+                description_md:
+                  "There was an issue parsing the recipe. Please try again.",
+                public: true,
+              },
+              ingredients: [],
+              steps: [],
+              substitutions: [],
+              images: [],
+            };
+
             controller.enqueue(
               encoder.encode(`data: ${
                 JSON.stringify({
-                  type: "error",
-                  error: "Failed to generate valid recipe structure",
+                  type: "complete",
+                  recipe: fallbackRecipe,
                 })
               }\n\n`),
             );

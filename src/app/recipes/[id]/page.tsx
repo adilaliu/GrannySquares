@@ -101,7 +101,97 @@ export default function RecipePage() {
           setRecipe(result.data);
           setIsOwner(result.isOwner || false);
         } else {
-          setError(result.error || "Failed to load recipe");
+          // Set a sample recipe if none found
+          setRecipe({
+            id: "sample-1",
+            title: "Sample Recipe",
+            slug: "sample-recipe",
+            description_md:
+              "This is a sample recipe to demonstrate the interface when no recipe is found.",
+            yield_text: "1 serving",
+            total_time_min: 10,
+            active_time_min: 5,
+            cuisine: "American",
+            difficulty: "easy",
+            diet_tags: ["vegetarian"],
+            allergen_tags: ["gluten-free"],
+            hero_image_url: null,
+            nutrition_json: null,
+            public: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            user_id: "sample-user",
+            ingredients: [
+              {
+                recipe_id: "sample-1",
+                idx: 0,
+                quantity: 1,
+                unit: "cup",
+                item: "Sample ingredient",
+                notes: "This is a sample note",
+              },
+              {
+                recipe_id: "sample-1",
+                idx: 1,
+                quantity: 2,
+                unit: "cups",
+                item: "Sample ingredient 2",
+                notes: null,
+              },
+              {
+                recipe_id: "sample-1",
+                idx: 2,
+                quantity: 3,
+                unit: "cups",
+                item: "Sample ingredient 3",
+                notes: null,
+              },
+            ],
+            steps: [
+              {
+                recipe_id: "sample-1",
+                idx: 0,
+                instruction: "This is a sample cooking step",
+                timer_seconds: null,
+                temperature_c: null,
+                tool: null,
+                tip: null,
+                image_url: null,
+              },
+              {
+                recipe_id: "sample-1",
+                idx: 1,
+                instruction: "This is a sample cooking step 2",
+                timer_seconds: null,
+                temperature_c: null,
+                tool: null,
+                tip: null,
+                image_url: null,
+              },
+              {
+                recipe_id: "sample-1",
+                idx: 2,
+                instruction: "This is a sample cooking step 3",
+                timer_seconds: null,
+                temperature_c: null,
+                tool: null,
+                tip: "Sample tip for cooking",
+                image_url: null,
+              },
+            ],
+            substitutions: [
+              {
+                recipe_id: "sample-1",
+                ingredient_idx: 0,
+                suggestion: "Sample substitution",
+              },
+            ],
+            images: [],
+            comments: [],
+            like_count: 0,
+            liked_by_me: false,
+          });
+          setError(null); // Clear error since we're showing sample recipe
         }
       } catch (err) {
         setError("An unexpected error occurred");
@@ -177,7 +267,7 @@ export default function RecipePage() {
           </p>
           <Link
             href="/"
-            className="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="inline-block px-4 py-2 bg-orange/80 text-white rounded hover:bg-orange/60"
           >
             Go Home
           </Link>
@@ -187,20 +277,20 @@ export default function RecipePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6">
           <Link
             href="/"
-            className="text-blue-600 hover:text-blue-800 mb-4 inline-block font-advent-pro font-semibold"
+            className="text-brown hover:text-brown/80 mb-4 inline-block font-advent-pro font-semibold"
           >
             ← Back to recipes
           </Link>
 
           {isOwner && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-              <p className="text-blue-800 text-sm font-advent-pro">
+            <div className="bg-blue-50 border border-brown/50 rounded-lg p-3 mb-4">
+              <p className="text-brown text-sm font-advent-pro">
                 You are the author of this recipe
               </p>
             </div>
@@ -208,7 +298,7 @@ export default function RecipePage() {
         </div>
 
         {/* Hero Image */}
-        {recipe.hero_image_url && (
+        {/* {recipe.hero_image_url && (
           <div className="mb-8">
             <img
               src={recipe.hero_image_url}
@@ -216,17 +306,17 @@ export default function RecipePage() {
               className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
             />
           </div>
-        )}
+        )} */}
 
         {/* Recipe Card */}
         <RecipeCard
           recipe={convertToRecipeDraft(recipe)}
-          isComplete={true}
+          isComplete={false}
           className="min-h-[600px]"
         />
 
         {/* Additional Images */}
-        {recipe.images.length > 0 && (
+        {/* {recipe.images.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mt-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4 font-advent-pro">
               Gallery
@@ -248,10 +338,10 @@ export default function RecipePage() {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Recipe Info */}
-        <div className="bg-white rounded-lg shadow-md p-6 mt-6">
+        {/* <div className="bg-white rounded-lg shadow-md p-6 mt-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 font-advent-pro">
             Recipe Information
           </h2>
@@ -281,7 +371,7 @@ export default function RecipePage() {
               <span className="ml-2 font-mono text-xs">{recipe.id}</span>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

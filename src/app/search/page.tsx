@@ -191,14 +191,14 @@ function SearchPageContent() {
               >
                 {/* Recipe Image */}
                 <div className="aspect-square relative overflow-hidden">
-                  <img
+                  {/* <img
                     src={
                       recipe.hero_image_url ||
                       `https://images.unsplash.com/photo-1601979031925-424e53b6caaa?w=400&h=400&fit=crop&crop=center`
                     }
                     alt={recipe.title}
                     className="w-full h-full object-cover transition-transform duration-200 hover:scale-110"
-                  />
+                  /> */}
                   {/* Time badges */}
                   {recipe.total_time_min && (
                     <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">

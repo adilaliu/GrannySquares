@@ -161,86 +161,88 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       className={`relative ${className}`}
       style={{
         transformStyle: "preserve-3d",
-        transition: "transform 0.6s",
-        transform: isFlipping ? "rotateX(360deg)" : "rotateX(0deg)",
+        transition: "transform 1s",
+        transform: isFlipping ? "rotateY(360deg)" : "rotateY(0deg)",
       }}
     >
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden h-full">
+      <div className="bg-[#FFFAF3] rounded-2xl shadow-2xl overflow-hidden w-[600px] h-[600px]">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-3 border-b border-gray-200">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2 font-advent-pro">
+              <h2 className="text-lg font-bold text-brown font-advent-pro text-center uppercase">
                 {recipeData.title ||
                   (isStreaming ? "Creating Recipe..." : "Untitled Recipe")}
               </h2>
 
-              {recipeData.description_md && (
-                <p className="text-gray-600 mb-4">
-                  {recipeData.description_md}
-                </p>
+              {/* Cook Time and Servings Meta */}
+              {(recipeData.total_time_min || recipeData.yield_text) && (
+                <div className="flex justify-center mt-1">
+                  <div className="border-t-[3px] border-brown pt-3">
+                    <div className="flex items-center gap-4 text-xs text-gray-700 px-3">
+                      {recipeData.total_time_min && (
+                        <div className="flex items-center gap-2">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth="2"
+                          >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12,6 12,12 16,14"></polyline>
+                          </svg>
+                          <span className="font-semibold">
+                            {formatTime(recipeData.total_time_min)}
+                          </span>
+                        </div>
+                      )}
+                      {recipeData.yield_text && (
+                        <div className="flex items-center gap-2">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth="2"
+                          >
+                            <path d="M3 11l18-5v12L3 14v-3z"></path>
+                            <path d="m3 11 18-5v12L3 14v-3z"></path>
+                            <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
+                          </svg>
+                          <span className="font-semibold">
+                            {recipeData.yield_text} servings
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 
             {/* Streaming indicator */}
             {isStreaming && (
               <div className="flex-shrink-0 ml-4">
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-orange rounded-full animate-pulse"></div>
               </div>
             )}
           </div>
 
-          {/* Recipe Meta */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-            {recipeData.yield_text && (
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-lg mb-1">🍽</div>
-                <div className="text-xs text-gray-600">Serves</div>
-                <div className="font-semibold text-sm">
-                  {recipeData.yield_text}
-                </div>
-              </div>
-            )}
-
-            {recipeData.total_time_min && (
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-lg mb-1">⏱</div>
-                <div className="text-xs text-gray-600">Total Time</div>
-                <div className="font-semibold text-sm">
-                  {formatTime(recipeData.total_time_min)}
-                </div>
-              </div>
-            )}
-
-            {recipeData.difficulty && (
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-lg mb-1">📊</div>
-                <div className="text-xs text-gray-600">Difficulty</div>
-                <div className="font-semibold text-sm capitalize">
-                  {recipeData.difficulty}
-                </div>
-              </div>
-            )}
-
-            {recipeData.cuisine && (
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-lg mb-1">🌍</div>
-                <div className="text-xs text-gray-600">Cuisine</div>
-                <div className="font-semibold text-sm">
-                  {recipeData.cuisine}
-                </div>
-              </div>
-            )}
-          </div>
+          {recipeData.description_md && (
+            <p className="text-gray-600 mb-4 mt-6 text-center">
+              {recipeData.description_md}
+            </p>
+          )}
 
           {/* Tags */}
           {recipeData.diet_tags && recipeData.diet_tags.length > 0 && (
-            <div className="mt-4">
-              <div className="flex flex-wrap gap-2">
+            <div className="mt-4 text-center">
+              <div className="flex flex-wrap gap-2 justify-center">
                 {recipeData.diet_tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium"
+                    className="px-2 py-1 bg-orange/10 text-orange rounded-full text-xs font-medium"
                   >
                     {tag}
                   </span>
@@ -251,42 +253,44 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="grid md:grid-cols-3 gap-6 p-6">
+        <div className="overflow-y-auto">
+          <div className="p-3 space-y-3">
             {/* Ingredients */}
-            <div className="md:col-span-1">
-              <h3 className="text-lg font-bold text-gray-900 mb-3 font-advent-pro">
+            <div>
+              <h3 className="text-base font-bold text-orange mb-2 font-advent-pro">
                 Ingredients
               </h3>
               {data.ingredients && data.ingredients.length > 0 ? (
-                <ul className="space-y-2">
-                  {data.ingredients
-                    .sort((a, b) => a.idx - b.idx)
-                    .map((ingredient) => (
-                      <li
-                        key={ingredient.idx}
-                        className="flex items-start text-sm"
-                      >
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium mr-2 mt-0.5">
-                          {ingredient.idx + 1}
-                        </span>
-                        <div className="flex-1">
-                          <span className="font-medium">
-                            {formatQuantity(
-                              ingredient.quantity,
-                              ingredient.unit
-                            )}{" "}
-                            {ingredient.item || "..."}
+                <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+                  <ul className="space-y-1">
+                    {data.ingredients
+                      .sort((a, b) => a.idx - b.idx)
+                      .map((ingredient) => (
+                        <li
+                          key={ingredient.idx}
+                          className="flex items-start text-xs break-inside-avoid mb-1"
+                        >
+                          <span className="flex-shrink-0 w-5 h-5 bg-orange/10 text-orange rounded-full flex items-center justify-center text-xs font-medium mr-2 mt-0.5">
+                            {ingredient.idx + 1}
                           </span>
-                          {ingredient.notes && (
-                            <div className="text-xs text-gray-600 mt-1">
-                              {ingredient.notes}
-                            </div>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                </ul>
+                          <div className="flex-1">
+                            <span className="font-medium">
+                              {formatQuantity(
+                                ingredient.quantity,
+                                ingredient.unit
+                              )}{" "}
+                              {ingredient.item || "..."}
+                            </span>
+                            {ingredient.notes && (
+                              <div className="text-xs text-gray-600 mt-1">
+                                {ingredient.notes}
+                              </div>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
               ) : (
                 <p className="text-gray-500 italic text-sm">
                   {isStreaming
@@ -297,8 +301,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             </div>
 
             {/* Instructions */}
-            <div className="md:col-span-2">
-              <h3 className="text-lg font-bold text-gray-900 mb-3 font-advent-pro">
+            <div>
+              <h3 className="text-base font-bold text-orange mb-2 font-advent-pro">
                 Instructions
               </h3>
               {data.steps && data.steps.length > 0 ? (
@@ -307,7 +311,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                     .sort((a, b) => a.idx - b.idx)
                     .map((step) => (
                       <div key={step.idx} className="flex items-start">
-                        <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold mr-3 mt-0.5 text-xs">
+                        <span className="flex-shrink-0 w-6 h-6 bg-orange text-white rounded-full flex items-center justify-center font-bold mr-3 mt-0.5 text-xs">
                           {step.idx + 1}
                         </span>
                         <div className="flex-1">
@@ -361,13 +365,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
           {/* Substitutions */}
           {data.substitutions && data.substitutions.length > 0 && (
-            <div className="px-6 pb-6">
+            <div className="px-4 pb-4">
               <h3 className="text-lg font-bold text-gray-900 mb-3 font-advent-pro">
                 Substitutions
               </h3>
               <div className="space-y-2">
                 {data.substitutions.map((sub, index) => (
-                  <div key={index} className="text-sm p-2 bg-blue-50 rounded">
+                  <div key={index} className="text-sm p-2 bg-orange/10 rounded">
                     <span className="font-medium">
                       Ingredient #{sub.ingredient_idx + 1}:
                     </span>

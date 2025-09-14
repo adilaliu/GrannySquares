@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { provider, email, redirectTo } = body;
+    const { provider, email, phone, redirectTo } = body;
 
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
@@ -45,8 +45,23 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (provider === "phone" && phone) {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone,
+      });
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+
+      return NextResponse.json({
+        message: "Check your phone for the verification code!",
+        data,
+      });
+    }
+
     return NextResponse.json(
-      { error: "Invalid provider or missing email" },
+      { error: "Invalid provider or missing email/phone" },
       { status: 400 },
     );
   } catch (error) {

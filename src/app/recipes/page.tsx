@@ -54,6 +54,7 @@ export default function RecipesPage() {
 
   useEffect(() => {
     loadRecipes(search, page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -155,7 +156,7 @@ export default function RecipesPage() {
                 <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                   {/* Image */}
                   <div className="h-48 bg-gray-200 relative">
-                    {recipe.hero_image_url ? (
+                    {/* {recipe.hero_image_url ? (
                       <img
                         src={recipe.hero_image_url}
                         alt={recipe.title}
@@ -165,7 +166,7 @@ export default function RecipesPage() {
                       <div className="w-full h-full flex items-center justify-center">
                         <span className="text-gray-400 text-4xl">🍳</span>
                       </div>
-                    )}
+                    )} */}
 
                     {/* Time overlay */}
                     {recipe.minutes && (

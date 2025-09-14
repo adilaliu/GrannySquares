@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import GridBackgroundPattern from "../components/GridBackgroundPattern";
 import RecipeCard from "../components/RecipeCard";
 import { analyzeRecipe, createRecipe } from "@/utils/recipes-api";
+import { getCurrentUser } from "@/utils/auth-api";
 import { FullRecipeDraft } from "@/db/client";
 
 // Extend Window interface to include webkitSpeechRecognition
@@ -15,12 +17,17 @@ declare global {
 }
 
 const CreateRecipePage: React.FC = () => {
+  const router = useRouter();
   const [isRecording, setIsRecording] = useState(false);
   const [transcription, setTranscription] = useState("");
   const [interimTranscription, setInterimTranscription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSupported, setIsSupported] = useState(true);
   const [language] = useState("en-US");
+
+  // Auth states
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Analysis states
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -33,6 +40,30 @@ const CreateRecipePage: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
+
+  const checkAuthentication = useCallback(async () => {
+    setIsCheckingAuth(true);
+    try {
+      const { user, error } = await getCurrentUser();
+      if (error || !user) {
+        // Redirect to sign-in page with return URL
+        router.push(`/auth/signin?redirectTo=${encodeURIComponent("/create")}`);
+        return;
+      }
+      setIsAuthenticated(true);
+    } catch (err) {
+      console.error("Auth check failed:", err);
+      // Redirect to sign-in without exposing technical details
+      router.push(`/auth/signin?redirectTo=${encodeURIComponent("/create")}`);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  }, [router]);
+
+  // Check authentication on mount
+  useEffect(() => {
+    checkAuthentication();
+  }, [checkAuthentication]);
 
   // Check for Web Speech API support
   useEffect(() => {
@@ -148,8 +179,7 @@ const CreateRecipePage: React.FC = () => {
   };
 
   const handleBack = () => {
-    // TODO: Implement back navigation
-    console.log("Back clicked");
+    router.push("/");
   };
 
   const handleAnalyze = async () => {
@@ -252,7 +282,28 @@ const CreateRecipePage: React.FC = () => {
     setAnalyzedRecipe(null);
     setAnalysisContent("");
     setError(null);
+    setTranscription(""); // Reset transcription box
   };
+
+  // Show loading screen while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="h-screen relative overflow-hidden flex items-center justify-center">
+        <GridBackgroundPattern />
+        <div className="relative z-10 flex items-center gap-3 text-gray-600">
+          <div className="w-8 h-8 border-4 border-orange border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-lg font-medium font-advent-pro">
+            Checking authentication...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, the user will be redirected by useEffect
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="h-screen relative overflow-hidden flex flex-col">

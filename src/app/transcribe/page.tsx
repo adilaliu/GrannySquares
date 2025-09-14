@@ -2,18 +2,6 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 
-interface TranscriptionWord {
-  word: string;
-  start: number;
-  end: number;
-}
-
-interface TranscriptionResult {
-  text: string;
-  words?: TranscriptionWord[];
-  duration?: number;
-}
-
 // Extend Window interface to include webkitSpeechRecognition
 declare global {
   interface Window {
@@ -26,14 +14,12 @@ export default function TranscribePage() {
   const [isRecording, setIsRecording] = useState(false);
   const [transcription, setTranscription] = useState<string>("");
   const [interimTranscription, setInterimTranscription] = useState<string>("");
-  const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSupported, setIsSupported] = useState(true);
   const [language, setLanguage] = useState("en-US");
   const [confidence, setConfidence] = useState<number>(0);
 
   const recognitionRef = useRef<any>(null);
-  const streamRef = useRef<MediaStream | null>(null);
 
   // Check for Web Speech API support
   useEffect(() => {
@@ -63,7 +49,6 @@ export default function TranscribePage() {
     // Event handlers
     recognition.onstart = () => {
       setIsRecording(true);
-      setIsTranscribing(true);
       setError(null);
       console.log("Speech recognition started");
     };
@@ -95,13 +80,11 @@ export default function TranscribePage() {
       console.error("Speech recognition error:", event.error);
       setError(`Speech recognition error: ${event.error}`);
       setIsRecording(false);
-      setIsTranscribing(false);
     };
 
     recognition.onend = () => {
       console.log("Speech recognition ended");
       setIsRecording(false);
-      setIsTranscribing(false);
       setInterimTranscription("");
     };
 

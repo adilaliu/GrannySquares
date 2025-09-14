@@ -291,7 +291,7 @@ export default function WavyGrid({
               <div
                 className="absolute inset-0 flex items-end p-3 opacity-0 hover:opacity-100 transition-opacity duration-300"
                 style={{
-                  backgroundColor: "rgba(0, 0, 0, 0.4)",
+                  backgroundColor: "rgba(0, 0, 0, 0.1)",
                 }}
               >
                 <h3 className="text-white text-sm font-semibold leading-tight">

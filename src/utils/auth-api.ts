@@ -84,6 +84,37 @@ export async function signInWithMagicLink(
 }
 
 /**
+ * Sign in with phone number (SMS OTP)
+ */
+export async function signInWithPhone(
+  phone: string,
+): Promise<SignInResponse> {
+  try {
+    const response = await fetch("/api/auth/sign-in", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        provider: "phone",
+        phone,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { error: data.error || "Sign in failed" };
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Phone sign-in error:", error);
+    return { error: "Network error occurred" };
+  }
+}
+
+/**
  * Sign out the current user
  */
 export async function signOut(): Promise<{ message?: string; error?: string }> {
