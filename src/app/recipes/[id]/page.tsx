@@ -6,6 +6,7 @@ import { getRecipe } from "@/utils/recipes-api";
 import { getCurrentUser } from "@/utils/auth-api";
 import RecipeCard from "@/app/components/RecipeCard";
 import Link from "next/link";
+import GridBackgroundPattern from "@/app/components/GridBackgroundPattern";
 
 interface FullRecipe {
   id: string;
@@ -230,6 +231,8 @@ export default function RecipePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
+        <GridBackgroundPattern />
+
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading recipe...</p>
@@ -241,6 +244,8 @@ export default function RecipePage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
+        <GridBackgroundPattern />
+
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
           <p className="text-gray-600 mb-4">{error}</p>
@@ -258,6 +263,8 @@ export default function RecipePage() {
   if (!recipe) {
     return (
       <div className="min-h-screen flex items-center justify-center">
+        <GridBackgroundPattern />
+
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-600 mb-4">
             Recipe Not Found
@@ -278,12 +285,14 @@ export default function RecipePage() {
 
   return (
     <div className="min-h-screen">
+      <GridBackgroundPattern />
+
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 relative">
           <Link
             href="/"
-            className="text-brown hover:text-brown/80 mb-4 inline-block font-advent-pro font-semibold"
+            className="text-brown hover:text-brown/80 mb-4 inline-block font-advent-pro font-semibold uppercase"
           >
             ← Back to recipes
           </Link>
@@ -309,11 +318,13 @@ export default function RecipePage() {
         )} */}
 
         {/* Recipe Card */}
-        <RecipeCard
-          recipe={convertToRecipeDraft(recipe)}
-          isComplete={false}
-          className="min-h-[600px]"
-        />
+        <div className="relative h-full w-full flex items-center justify-center">
+          <RecipeCard
+            recipe={convertToRecipeDraft(recipe)}
+            isComplete={false}
+            className="h-full w-auto aspect-square"
+          />
+        </div>
 
         {/* Additional Images */}
         {/* {recipe.images.length > 0 && (

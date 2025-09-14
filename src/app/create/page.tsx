@@ -313,8 +313,8 @@ const CreateRecipePage: React.FC = () => {
       {/* Header */}
       <div className="relative z-10 py-6 flex-shrink-0">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold text-gray-800 text-center font-advent-pro">
-            SHARE YOUR OWN RECIPE
+          <h1 className="text-4xl font-bold text-gray-800 text-center font-advent-pro uppercase">
+            Share Your Own Recipe
           </h1>
         </div>
       </div>
