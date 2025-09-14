@@ -34,6 +34,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/final%20meatball.svg" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${adventPro.variable} ${inter.variable} antialiased`}
       >
