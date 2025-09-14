@@ -109,34 +109,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/profiles - Get current user's profile (auth required)
+// GET /api/profiles - Get current user's profile (no auth required)
 export async function GET() {
-  try {
-    const user = await getAuthenticatedUser();
-    if (!user) {
-      return authenticationRequiredResponse();
-    }
-
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const { data: profile, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (error && error.code !== "PGRST116") {
-      console.error("Error fetching profile:", error);
-      return errorResponse("Failed to fetch profile");
-    }
-
-    return successResponse({
-      profile: profile || null,
-      hasProfile: !!profile,
-    });
-  } catch (error) {
-    console.error("Error fetching profile:", error);
-    return errorResponse("Failed to fetch profile");
-  }
+  // Return the default profile without authentication
+  return successResponse({
+    profile: {
+      id: "8df050ee-e733-479f-83c8-b6a2efa0d95f",
+      handle: "default-user",
+      display_name: "Default User",
+      avatar_url: null,
+      created_at: new Date().toISOString(),
+    },
+    hasProfile: true,
+  });
 }

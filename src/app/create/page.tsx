@@ -10,8 +10,7 @@ import {
   createRecipe,
   generateRecipeImage,
 } from "@/utils/recipes-api";
-import { getCurrentUser } from "@/utils/auth-api";
-import { getCurrentProfile, createProfile } from "@/utils/profiles-api";
+import { createProfile } from "@/utils/profiles-api";
 import { FullRecipeDraft } from "@/db/client";
 import ProfileOnboarding from "@/app/components/ProfileOnboarding";
 
@@ -59,40 +58,10 @@ const CreateRecipePage: React.FC = () => {
 
   const checkAuthentication = useCallback(async () => {
     setIsCheckingAuth(true);
-    try {
-      const { user, error } = await getCurrentUser();
-      if (error || !user) {
-        // Redirect to sign-in page with return URL
-        router.push(`/auth/signin?redirectTo=${encodeURIComponent("/create")}`);
-        return;
-      }
-
-      // Check if user has a profile
-      const profileResult = await getCurrentProfile();
-
-      if ("error" in profileResult) {
-        console.error("Error checking profile:", profileResult.error);
-        // If there's an error, assume they need onboarding
-        setShowOnboarding(true);
-        setIsCheckingAuth(false);
-        return;
-      }
-
-      if (profileResult.hasProfile) {
-        // User has a profile, they can proceed
-        setIsAuthenticated(true);
-      } else {
-        // User needs to create a profile
-        setShowOnboarding(true);
-      }
-    } catch (err) {
-      console.error("Auth check failed:", err);
-      // Redirect to sign-in without exposing technical details
-      router.push(`/auth/signin?redirectTo=${encodeURIComponent("/create")}`);
-    } finally {
-      setIsCheckingAuth(false);
-    }
-  }, [router]);
+    // No authentication required - directly set as authenticated
+    setIsAuthenticated(true);
+    setIsCheckingAuth(false);
+  }, []);
 
   // Check authentication on mount
   useEffect(() => {
@@ -397,7 +366,10 @@ const CreateRecipePage: React.FC = () => {
         <GridBackgroundPattern />
         <div className="relative z-10 flex items-center gap-3 text-gray-600">
           <div className="w-8 h-8 border-4 border-orange border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-xl font-semibold font-advent-pro" style={{ color: "#C56219" }}>
+          <span
+            className="text-xl font-semibold font-advent-pro"
+            style={{ color: "#C56219" }}
+          >
             CHECKING AUTHENTIFICATION...
           </span>
         </div>

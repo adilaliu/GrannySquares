@@ -141,31 +141,32 @@ export async function signOut(): Promise<{ message?: string; error?: string }> {
 
 /**
  * Get the current user session
+ * Always returns the default user (no authentication required)
  */
 export async function getCurrentUser(): Promise<UserResponse> {
-  try {
-    const response = await fetch("/api/auth/user", {
-      method: "GET",
-      credentials: "include",
-    });
-
-    const data = await response.json();
-
-    if (!response.ok && response.status !== 401) {
-      return { error: data.error || "Failed to fetch user" };
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Get user error:", error);
-    return { error: "Network error occurred" };
-  }
+  // Return the default user without making any API calls
+  return {
+    user: {
+      id: "8df050ee-e733-479f-83c8-b6a2efa0d95f",
+      email: "default@example.com",
+      user_metadata: {},
+      app_metadata: {},
+      aud: "authenticated",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      profile: {
+        id: "8df050ee-e733-479f-83c8-b6a2efa0d95f",
+        handle: "default-user",
+        display_name: "Default User",
+      },
+    },
+  };
 }
 
 /**
  * Check if user is authenticated
+ * Always returns true (no authentication required)
  */
 export async function isAuthenticated(): Promise<boolean> {
-  const { user, error } = await getCurrentUser();
-  return !error && !!user;
+  return true;
 }

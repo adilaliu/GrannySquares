@@ -66,27 +66,22 @@ export async function createProfile(
 
 /**
  * Get current user's profile
+ * Always returns the default user profile (no authentication required)
  */
 export async function getCurrentProfile(): Promise<
   ProfileResponse | { error: string }
 > {
-  try {
-    const response = await fetch("/api/profiles", {
-      method: "GET",
-      credentials: "include",
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      return { error: result.error || "Failed to fetch profile" };
-    }
-
-    return result.data;
-  } catch (error) {
-    console.error("Get profile error:", error);
-    return { error: "Network error occurred" };
-  }
+  // Return the default profile without making any API calls
+  return {
+    profile: {
+      id: "8df050ee-e733-479f-83c8-b6a2efa0d95f",
+      handle: "default-user",
+      display_name: "Default User",
+      avatar_url: null,
+      created_at: new Date().toISOString(),
+    },
+    hasProfile: true,
+  };
 }
 
 /**
