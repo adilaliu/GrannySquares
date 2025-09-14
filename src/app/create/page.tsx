@@ -6,7 +6,9 @@ import GridBackgroundPattern from "../components/GridBackgroundPattern";
 import RecipeCard from "../components/RecipeCard";
 import { analyzeRecipe, createRecipe } from "@/utils/recipes-api";
 import { getCurrentUser } from "@/utils/auth-api";
+import { getCurrentProfile, createProfile } from "@/utils/profiles-api";
 import { FullRecipeDraft } from "@/db/client";
+import ProfileOnboarding from "@/app/components/ProfileOnboarding";
 
 // Extend Window interface to include webkitSpeechRecognition
 declare global {
@@ -28,6 +30,9 @@ const CreateRecipePage: React.FC = () => {
   // Auth states
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  const [profileError, setProfileError] = useState("");
 
   // Analysis states
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -50,7 +55,25 @@ const CreateRecipePage: React.FC = () => {
         router.push(`/auth/signin?redirectTo=${encodeURIComponent("/create")}`);
         return;
       }
-      setIsAuthenticated(true);
+
+      // Check if user has a profile
+      const profileResult = await getCurrentProfile();
+
+      if ("error" in profileResult) {
+        console.error("Error checking profile:", profileResult.error);
+        // If there's an error, assume they need onboarding
+        setShowOnboarding(true);
+        setIsCheckingAuth(false);
+        return;
+      }
+
+      if (profileResult.hasProfile) {
+        // User has a profile, they can proceed
+        setIsAuthenticated(true);
+      } else {
+        // User needs to create a profile
+        setShowOnboarding(true);
+      }
     } catch (err) {
       console.error("Auth check failed:", err);
       // Redirect to sign-in without exposing technical details
@@ -64,6 +87,36 @@ const CreateRecipePage: React.FC = () => {
   useEffect(() => {
     checkAuthentication();
   }, [checkAuthentication]);
+
+  const handleProfileComplete = async (profileData: {
+    handle: string;
+    displayName: string;
+  }) => {
+    setIsCreatingProfile(true);
+    setProfileError("");
+
+    try {
+      const result = await createProfile(profileData);
+
+      if (result.success) {
+        // Profile created successfully, allow access to create page
+        setShowOnboarding(false);
+        setIsAuthenticated(true);
+      } else {
+        setProfileError(result.error || "Failed to create profile");
+      }
+    } catch (err) {
+      console.error("Error creating profile:", err);
+      setProfileError("An unexpected error occurred");
+    } finally {
+      setIsCreatingProfile(false);
+    }
+  };
+
+  const handleSkipProfile = () => {
+    // For now, redirect to home page if they skip
+    router.push("/");
+  };
 
   // Check for Web Speech API support
   useEffect(() => {
@@ -190,7 +243,7 @@ const CreateRecipePage: React.FC = () => {
 
     setIsAnalyzing(true);
     setAnalysisContent("");
-    setAnalyzedRecipe(null);
+    // Don't reset analyzedRecipe to null - preserve any existing data
     setError(null);
     setShowPreview(true); // Show the recipe card immediately for streaming
 
@@ -256,8 +309,11 @@ const CreateRecipePage: React.FC = () => {
       });
 
       if (result.success && result.data) {
-        // Redirect to the created recipe
-        window.location.href = `/recipes/${result.data.id}`;
+        // Redirect to the created recipe using slug (preferred) or fallback to ID
+        const recipeRoute = result.data.slug
+          ? result.data.slug
+          : result.data.id;
+        window.location.href = `/recipes/${recipeRoute}`;
       } else {
         setError(result.error || "Failed to save recipe");
       }
@@ -300,6 +356,18 @@ const CreateRecipePage: React.FC = () => {
     );
   }
 
+  // Show profile onboarding if user needs to create a profile
+  if (showOnboarding) {
+    return (
+      <ProfileOnboarding
+        onComplete={handleProfileComplete}
+        onSkip={handleSkipProfile}
+        isSubmitting={isCreatingProfile}
+        error={profileError}
+      />
+    );
+  }
+
   // If not authenticated, the user will be redirected by useEffect
   if (!isAuthenticated) {
     return null;
@@ -322,8 +390,8 @@ const CreateRecipePage: React.FC = () => {
       {/* Main Content */}
       <div className="relative z-10 flex-1 container mx-auto px-4 pb-24">
         <div
-          className={`flex h-full gap-12 items-center ${
-            showPreview ? "justify-center" : ""
+          className={`flex h-full gap-12 ${
+            showPreview ? "justify-center items-center" : "items-center"
           }`}
         >
           {/* Left Panel - 1/3 width */}
@@ -479,16 +547,18 @@ const CreateRecipePage: React.FC = () => {
               </>
             ) : (
               /* Recipe Card */
-              <RecipeCard
-                recipe={analyzedRecipe}
-                partialContent={analysisContent}
-                isStreaming={isAnalyzing}
-                isComplete={!isAnalyzing && !!analyzedRecipe}
-                showActions={true}
-                onSave={handleSaveRecipe}
-                isSaving={isSaving}
-                className="flex-1"
-              />
+              <div className="w-full h-full flex items-center justify-center">
+                <RecipeCard
+                  recipe={analyzedRecipe}
+                  partialContent={analysisContent}
+                  isStreaming={isAnalyzing}
+                  isComplete={!isAnalyzing && !!analyzedRecipe}
+                  showActions={true}
+                  onSave={handleSaveRecipe}
+                  isSaving={isSaving}
+                  className="flex-1"
+                />
+              </div>
             )}
           </div>
         </div>

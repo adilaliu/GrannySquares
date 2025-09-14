@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   signInWithGoogle,
@@ -8,8 +8,9 @@ import {
   signInWithPhone,
   getCurrentUser,
 } from "@/utils/auth-api";
+import { getCurrentProfile, createProfile } from "@/utils/profiles-api";
 import GridBackgroundPattern from "@/app/components/GridBackgroundPattern";
-import CafeBorder from "@/app/components/CafeBorder";
+import ProfileOnboarding from "@/app/components/ProfileOnboarding";
 
 interface User {
   email: string;
@@ -32,17 +33,43 @@ function SignInContent() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<"email" | "phone">("email");
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+
+  const checkUserProfile = useCallback(async () => {
+    try {
+      const profileResult = await getCurrentProfile();
+
+      if ("error" in profileResult) {
+        console.error("Error checking profile:", profileResult.error);
+        // If there's an error, assume they need onboarding
+        setShowOnboarding(true);
+        return;
+      }
+
+      if (profileResult.hasProfile) {
+        // User has a profile, redirect to their destination
+        router.push(redirectTo);
+      } else {
+        // User needs to create a profile
+        setShowOnboarding(true);
+      }
+    } catch (err) {
+      console.error("Error checking user profile:", err);
+      setShowOnboarding(true);
+    }
+  }, [router, redirectTo]);
 
   useEffect(() => {
     loadUser();
   }, []);
 
   useEffect(() => {
-    // If user is already authenticated, redirect
-    if (user && !loading) {
-      router.push(redirectTo);
+    // If user is already authenticated, check if they have a profile
+    if (user && !loading && !showOnboarding) {
+      checkUserProfile();
     }
-  }, [user, loading, router, redirectTo]);
+  }, [user, loading, showOnboarding, checkUserProfile]);
 
   const loadUser = async () => {
     setLoading(true);
@@ -51,11 +78,13 @@ function SignInContent() {
       if (error) {
         // Don't show technical errors to users
         console.error("Auth error:", error);
+        setUser(null);
       } else {
         setUser(user);
       }
     } catch (err) {
       console.error("Failed to load user:", err);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -126,6 +155,35 @@ function SignInContent() {
     }
   };
 
+  const handleProfileComplete = async (profileData: {
+    handle: string;
+    displayName: string;
+  }) => {
+    setIsCreatingProfile(true);
+    setError("");
+
+    try {
+      const result = await createProfile(profileData);
+
+      if (result.success) {
+        // Profile created successfully, redirect to destination
+        router.push(redirectTo);
+      } else {
+        setError(result.error || "Failed to create profile");
+      }
+    } catch (err) {
+      console.error("Error creating profile:", err);
+      setError("An unexpected error occurred");
+    } finally {
+      setIsCreatingProfile(false);
+    }
+  };
+
+  const handleSkipProfile = () => {
+    // For now, we'll redirect anyway, but in the future you might want different behavior
+    router.push(redirectTo);
+  };
+
   if (loading) {
     return (
       <div className="h-screen relative overflow-hidden flex items-center justify-center">
@@ -140,7 +198,19 @@ function SignInContent() {
     );
   }
 
-  // If user is authenticated, they'll be redirected by useEffect
+  // If user is authenticated and needs profile setup
+  if (user && showOnboarding) {
+    return (
+      <ProfileOnboarding
+        onComplete={handleProfileComplete}
+        onSkip={handleSkipProfile}
+        isSubmitting={isCreatingProfile}
+        error={error}
+      />
+    );
+  }
+
+  // If user is authenticated and has profile, they'll be redirected by useEffect
   if (user) {
     return null;
   }
@@ -156,7 +226,10 @@ function SignInContent() {
           <h1 className="text-5xl font-extrabold text-gray-800 text-center font-advent-pro mb-4">
             NICE TO SEE YOU!
           </h1>
-          <p className="text-center text-xl font-inter font-medium" style={{ color: '#C56219' }}>
+          <p
+            className="text-center text-xl font-inter font-medium"
+            style={{ color: "#C56219" }}
+          >
             Sign in to share your delicious recipes
           </p>
         </div>

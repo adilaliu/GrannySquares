@@ -18,14 +18,29 @@ export async function GET(request: NextRequest) {
         const forwardedHost = request.headers.get("x-forwarded-host");
         const isLocalEnv = process.env.NODE_ENV === "development";
 
+        // Create a proper redirect response that includes session cookies
+        let redirectUrl;
         if (isLocalEnv) {
-          // We can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
-          return NextResponse.redirect(`${origin}${next}`);
+          redirectUrl = `${origin}${next}`;
         } else if (forwardedHost) {
-          return NextResponse.redirect(`https://${forwardedHost}${next}`);
+          redirectUrl = `https://${forwardedHost}${next}`;
         } else {
-          return NextResponse.redirect(`${origin}${next}`);
+          redirectUrl = `${origin}${next}`;
         }
+
+        const response = NextResponse.redirect(redirectUrl);
+
+        // Ensure session cookies are properly set
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // The middleware will handle cookie setting, but we ensure session is valid
+          console.log(
+            "Session established successfully for user:",
+            session.user.id,
+          );
+        }
+
+        return response;
       }
     }
 

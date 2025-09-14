@@ -14,8 +14,9 @@ export async function POST(request: NextRequest) {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: redirectTo ||
-            `${request.nextUrl.origin}/api/auth/callback`,
+          redirectTo: `${request.nextUrl.origin}/api/auth/callback?next=${
+            encodeURIComponent(redirectTo || "/")
+          }`,
         },
       });
 
@@ -30,8 +31,9 @@ export async function POST(request: NextRequest) {
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: redirectTo ||
-            `${request.nextUrl.origin}/api/auth/callback`,
+          emailRedirectTo: `${request.nextUrl.origin}/api/auth/callback?next=${
+            encodeURIComponent(redirectTo || "/")
+          }`,
         },
       });
 

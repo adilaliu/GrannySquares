@@ -4,7 +4,10 @@ import { NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   try {
     // This `createClient` function creates a Supabase client configured to use cookies
-    const { response } = createClient(request);
+    const { supabase, response } = createClient(request);
+
+    // Refresh session if expired - this resolves the session issue
+    await supabase.auth.getUser();
 
     return response;
   } catch (e) {

@@ -364,3 +364,9 @@ alter table public.substitutions enable row level security;
 alter table public.images enable row level security;
 alter table public.comments enable row level security;
 alter table public.likes enable row level security;
+
+-- Add missing insert policy for profiles table
+DROP POLICY IF EXISTS profiles_insert_own ON public.profiles;
+CREATE POLICY profiles_insert_own
+  ON public.profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);

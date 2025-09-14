@@ -32,14 +32,53 @@ async function getRecipeWithOwnershipCheck(idOrSlug: string, userId?: string) {
     );
 
   if (isUuid) {
+    // Get full recipe data by ID (same as getFullRecipeBySlug but by ID)
     const { data, error } = await supabase
       .from("recipes")
-      .select("*")
+      .select(`
+        *,
+        ingredients (*),
+        steps (*),
+        substitutions (*),
+        images (*),
+        comments (*, profiles:profiles!comments_user_id_fkey (*))
+      `)
       .eq("id", idOrSlug)
       .single();
 
     if (error) return null;
-    recipe = data;
+
+    // Add like count and liked_by_me data (same as getFullRecipeBySlug)
+    const [{ data: likeAgg, error: likeErr }, { data: me }] = await Promise.all(
+      [
+        supabase.from("likes").select("recipe_id", {
+          count: "exact",
+          head: true,
+        })
+          .eq("recipe_id", data.id),
+        supabase.auth.getUser(),
+      ],
+    );
+    if (likeErr) return null;
+
+    const currentUserId = me.user?.id;
+    let liked_by_me = false;
+    if (currentUserId) {
+      const { data: myLike } = await supabase.from("likes").select("recipe_id")
+        .eq("recipe_id", data.id).eq("user_id", currentUserId).maybeSingle();
+      liked_by_me = !!myLike;
+    }
+
+    recipe = {
+      ...data,
+      ingredients: data.ingredients ?? [],
+      steps: data.steps ?? [],
+      substitutions: data.substitutions ?? [],
+      images: data.images ?? [],
+      comments: data.comments ?? [],
+      like_count: (likeAgg?.length ?? 0),
+      liked_by_me,
+    };
   } else {
     // Try to get by slug using the existing function
     recipe = await getFullRecipeBySlug(idOrSlug);
